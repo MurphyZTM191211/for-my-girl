@@ -35,6 +35,10 @@
         <span class="favorite-label">Favorite music</span>
         <span class="favorite-value">“Photograph”</span>
       </div>
+      <div class="favorite-fact">
+        <span class="favorite-label">Birthday</span>
+        <span class="favorite-value">31st of December</span>
+      </div>
     </div>
     <div class="anime-sky" aria-hidden="true">
       <span class="moon">🌙</span>
@@ -241,7 +245,7 @@
         <div class="reveal-card">
           <span class="badge">A tiny game for my favorite person</span>
           <h2>How well do you know my heart?</h2>
-          <p>Answer one little question to unlock your surprise.</p>
+          <p>Answer two little questions to unlock your surprise.</p>
           <button id="quizBtn" class="primary-btn">Unlock the surprise ✨</button>
         </div>
       </section>
@@ -282,6 +286,26 @@
             />
             <p id="passwordError" class="password-error" role="alert"></p>
             <button class="primary-btn" type="submit">Unlock the secret ✨</button>
+          </form>
+        </div>
+        <div id="quizGate" hidden>
+          <span class="badge">A little love quiz</span>
+          <h2 id="quizTitle">How well do you know me? 💌</h2>
+          <form id="birthdayQuiz" class="quiz-form">
+            <fieldset>
+              <legend>When is my birthday?</legend>
+              <label class="quiz-choice"><input type="radio" name="birthday" value="19.12.2011" required /> <span>19.12.2011</span></label>
+              <label class="quiz-choice"><input type="radio" name="birthday" value="19.12.2012" /> <span>19.12.2012</span></label>
+              <label class="quiz-choice"><input type="radio" name="birthday" value="12.19.2011" /> <span>12.19.2011</span></label>
+            </fieldset>
+            <fieldset>
+              <legend>What is our anniversary date?</legend>
+              <label class="quiz-choice"><input type="radio" name="anniversary" value="26.7" required /> <span>26.7</span></label>
+              <label class="quiz-choice"><input type="radio" name="anniversary" value="27.6" /> <span>27.6</span></label>
+              <label class="quiz-choice"><input type="radio" name="anniversary" value="26.6" /> <span>26.6</span></label>
+            </fieldset>
+            <p id="quizError" class="password-error" role="alert"></p>
+            <button class="primary-btn" type="submit">Unlock the surprise ✨</button>
           </form>
         </div>
         <div id="secretContent" class="secret-content" hidden>
