@@ -1,106 +1,223 @@
-const storyChapters = {
-  'hard-days': {
-    number: 'A little chapter · 01',
-    title: 'When everything felt like too much',
-    text: "You didn't ask me to pretend I was okay. You let me be exactly where I was, and stayed beside me anyway. I'll never forget how much that meant.",
-    sign: 'You made the heavy days easier to carry.',
-  },
-  'showing-up': {
-    number: 'A little chapter · 02',
-    title: 'You kept showing up',
-    text: "Somehow, whether you had the perfect words or not, you were there. That quiet kind of care reminded me I didn't have to go through everything on my own.",
-    sign: 'Your presence said more than words could.',
-  },
-  listening: {
-    number: 'A little chapter · 03',
-    title: 'You made room for me',
-    text: 'Thank you for listening without rushing me, for being patient, and for letting me feel whatever I needed to feel. You made it safe to be honest.',
-    sign: 'Being heard by you meant everything.',
-  },
-  light: {
-    number: 'A little chapter · 04',
-    title: 'Little by little, the light came back',
-    text: 'You reminded me that even hard seasons change. With you beside me, there was room for a laugh, a breath, and hope for brighter days.',
-    sign: 'Thank you for helping me find my way back.',
-  },
-};
+const screens = [...document.querySelectorAll(".screen")];
+const screenLinks = [...document.querySelectorAll("[data-screen]")];
+const memoryLinks = [...document.querySelectorAll(".memory-nav [data-screen]")];
 
-const storyTabs = Array.from(document.querySelectorAll('.story-tab'));
-const storyPanel = document.getElementById('story-panel');
-const storyNumber = document.getElementById('story-number');
-const storyTitle = document.getElementById('story-card-title');
-const storyText = document.getElementById('story-card-text');
-const storySign = document.getElementById('story-card-sign');
+function showScreen(screenId) {
+  const target = document.getElementById(screenId);
+  if (!target || !target.classList.contains("screen")) return;
 
-const selectStory = (tab, moveFocus = false) => {
-  const chapter = storyChapters[tab.dataset.story];
-  if (!chapter) return;
-
-  storyTabs.forEach((storyTab) => {
-    const isSelected = storyTab === tab;
-    storyTab.classList.toggle('active', isSelected);
-    storyTab.setAttribute('aria-selected', String(isSelected));
-    storyTab.tabIndex = isSelected ? 0 : -1;
+  screens.forEach((screen) => {
+    const isActive = screen === target;
+    screen.classList.toggle("active-screen", isActive);
+    screen.setAttribute("aria-hidden", String(!isActive));
   });
 
-  storyPanel.setAttribute('aria-labelledby', tab.id);
-  storyNumber.textContent = chapter.number;
-  storyTitle.textContent = chapter.title;
-  storyText.textContent = chapter.text;
-  storySign.textContent = chapter.sign;
+  memoryLinks.forEach((link) => {
+    const isActive = link.dataset.screen === screenId;
+    link.classList.toggle("active", isActive);
+    if (isActive) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
 
-  if (moveFocus) tab.focus();
-};
+  target.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "start",
+  });
+}
 
-storyTabs.forEach((tab, index) => {
-  tab.addEventListener('click', () => selectStory(tab));
-  tab.addEventListener('keydown', (event) => {
-    let nextIndex;
-    if (event.key === 'ArrowRight') nextIndex = (index + 1) % storyTabs.length;
-    if (event.key === 'ArrowLeft') nextIndex = (index - 1 + storyTabs.length) % storyTabs.length;
-    if (nextIndex === undefined) return;
+screenLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
     event.preventDefault();
-    selectStory(storyTabs[nextIndex], true);
+    const parentModal = link.closest(".modal");
+    if (parentModal) closeModal(parentModal);
+    showScreen(link.dataset.screen);
   });
 });
 
-const letterDialog = document.getElementById('letter-dialog');
-const openLetterButtons = document.querySelectorAll('[data-open-letter]');
-const closeLetterButtons = document.querySelectorAll('[data-close-letter]');
+const openLetterButton = document.querySelector("#openLetterBtn");
+const openSecretButton = document.querySelector("#secretBtn");
+const letterModal = document.querySelector("#letterModal");
+const secretModal = document.querySelector("#secretModal");
 
-openLetterButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    if (!letterDialog.open) letterDialog.showModal();
-  });
-});
+function openModal(modal) {
+  modal.classList.add("is-open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+  window.setTimeout(() => {
+    modal.querySelector(".modal-close")?.focus();
+  }, 50);
+}
 
-closeLetterButtons.forEach((button) => {
-  button.addEventListener('click', () => letterDialog.close());
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && letterDialog.open) letterDialog.close();
-});
-
-letterDialog.addEventListener('click', (event) => {
-  if (event.target === letterDialog) letterDialog.close();
-});
-
-const floatingLayer = document.getElementById('floatingLayer');
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-if (!reducedMotion) {
-  const decorations = ['♡', '✧', '✦'];
-
-  for (let index = 0; index < 12; index += 1) {
-    const decoration = document.createElement('span');
-    decoration.className = index % 3 === 1 ? 'floating-star' : 'floating-heart';
-    decoration.textContent = decorations[index % decorations.length];
-    decoration.style.left = `${(index * 37 + 9) % 100}%`;
-    decoration.style.fontSize = `${0.8 + (index % 4) * 0.18}rem`;
-    decoration.style.animationDuration = `${19 + (index % 7) * 2}s`;
-    decoration.style.animationDelay = `${-(index % 9) * 2}s`;
-    decoration.style.setProperty('--drift', `${(index % 2 ? 1 : -1) * (22 + (index % 5) * 13)}px`);
-    floatingLayer.appendChild(decoration);
+function closeModal(modal) {
+  modal.classList.remove("is-open");
+  modal.setAttribute("aria-hidden", "true");
+  if (!document.querySelector(".modal.is-open")) {
+    document.body.classList.remove("modal-open");
   }
 }
+
+openLetterButton.addEventListener("click", () => openModal(letterModal));
+openSecretButton.addEventListener("click", () => openModal(secretModal));
+
+document.querySelectorAll("[data-close-modal], [data-close-letter]").forEach((closeControl) => {
+  closeControl.addEventListener("click", () => {
+    const modal = closeControl.closest(".modal");
+    if (modal) closeModal(modal);
+  });
+});
+
+document.querySelectorAll(".modal-card").forEach((card) => {
+  card.addEventListener("click", (event) => event.stopPropagation());
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  document.querySelectorAll(".modal.is-open").forEach(closeModal);
+});
+
+const passwordForm = document.querySelector("#passwordForm");
+const passwordInput = document.querySelector("#secretPassword");
+const passwordError = document.querySelector("#passwordError");
+const passwordGate = document.querySelector("#passwordGate");
+const quizGate = document.querySelector("#quizGate");
+const birthdayQuiz = document.querySelector("#birthdayQuiz");
+const quizError = document.querySelector("#quizError");
+const secretContent = document.querySelector("#secretContent");
+const secretButton = document.querySelector("#secretloveButton");
+
+function resetSecret() {
+  passwordGate.hidden = false;
+  quizGate.hidden = true;
+  secretContent.hidden = true;
+  passwordError.textContent = "";
+  passwordInput.value = "";
+}
+
+openSecretButton.addEventListener("click", resetSecret);
+document.querySelector("#quizBtn").addEventListener("click", () => {
+  resetSecret();
+  passwordGate.hidden = true;
+  quizGate.hidden = false;
+  birthdayQuiz.reset();
+  quizError.textContent = "";
+  openModal(secretModal);
+});
+
+birthdayQuiz.addEventListener("change", (event) => {
+  if (!(event.target instanceof HTMLInputElement) || event.target.type !== "radio") return;
+  birthdayQuiz.classList.remove("is-incorrect");
+  quizError.textContent = "";
+  birthdayQuiz.querySelectorAll(`input[name="${event.target.name}"]`).forEach((input) => {
+    input.closest(".quiz-choice")?.classList.toggle("is-selected", input.checked);
+  });
+});
+
+birthdayQuiz.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const answers = new FormData(birthdayQuiz);
+
+  if (answers.get("birthday") !== "19.12.2011" || answers.get("anniversary") !== "26.7") {
+    quizError.textContent = "Not quite, my love. Give it another try ♡";
+    birthdayQuiz.classList.remove("is-incorrect");
+    void birthdayQuiz.offsetWidth;
+    birthdayQuiz.classList.add("is-incorrect");
+    window.setTimeout(() => birthdayQuiz.classList.remove("is-incorrect"), 500);
+    return;
+  }
+
+  createHeartBurst(birthdayQuiz.querySelector('[type="submit"]'));
+  quizGate.hidden = true;
+  secretContent.hidden = false;
+  secretContent.querySelector("h2").focus?.();
+});
+
+passwordForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const enteredCode = passwordInput.value.trim().replace(/\D/g, "");
+
+  if (enteredCode !== "191211") {
+    passwordError.textContent = "Not quite, my love. Try the date from our little timer ♡";
+    passwordInput.focus();
+    return;
+  }
+
+  passwordGate.hidden = true;
+  secretContent.hidden = false;
+  secretContent.querySelector("h2").focus?.();
+});
+
+secretButton.addEventListener("click", () => {
+  createHeartBurst(secretButton);
+  window.setTimeout(() => {
+    closeModal(secretModal);
+    showScreen("closing");
+  }, 420);
+});
+
+const timerElement = document.querySelector("#loveTimer");
+
+function getAnniversaryStart(now) {
+  const start = new Date(now.getFullYear(), 6, 26);
+  if (start > now) start.setFullYear(start.getFullYear() - 1);
+  return start;
+}
+
+function updateLoveTimer() {
+  const now = new Date();
+  const start = getAnniversaryStart(now);
+  let seconds = Math.floor((now.getTime() - start.getTime()) / 1000);
+  const days = Math.floor(seconds / 86400);
+  seconds %= 86400;
+  const hours = Math.floor(seconds / 3600);
+  seconds %= 3600;
+  const minutes = Math.floor(seconds / 60);
+  seconds %= 60;
+  timerElement.textContent = `${String(days).padStart(2, "0")}d ${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
+}
+
+updateLoveTimer();
+window.setInterval(updateLoveTimer, 1000);
+
+function createHeartBurst(source) {
+  const bounds = source.getBoundingClientRect();
+  const symbols = ["♥", "♡", "✦", "♥", "✧", "♡"];
+
+  symbols.forEach((symbol, index) => {
+    const particle = document.createElement("span");
+    const angle = (index / symbols.length) * Math.PI * 2;
+    particle.className = "heart-particle";
+    particle.textContent = symbol;
+    particle.setAttribute("aria-hidden", "true");
+    particle.style.left = `${bounds.left + bounds.width / 2}px`;
+    particle.style.top = `${bounds.top + bounds.height / 2}px`;
+    particle.style.setProperty("--particle-x", `${Math.cos(angle) * 54}px`);
+    particle.style.setProperty("--particle-y", `${Math.sin(angle) * 54}px`);
+    document.body.append(particle);
+    particle.addEventListener("animationend", () => particle.remove(), { once: true });
+  });
+}
+
+function makeFloatingDecorations() {
+  const layer = document.querySelector("#heartsLayer");
+  const decorations = [
+    { symbol: "♡", className: "bg-heart" },
+    { symbol: "♥", className: "bg-heart" },
+    { symbol: "✿", className: "bg-flower" },
+    { symbol: "❀", className: "bg-flower" },
+  ];
+
+  for (let index = 0; index < 24; index += 1) {
+    const decoration = decorations[index % decorations.length];
+    const element = document.createElement("span");
+    element.className = `floating-decoration ${decoration.className}`;
+    element.textContent = decoration.symbol;
+    element.style.left = `${(index * 41 + 7) % 100}%`;
+    element.style.animationDuration = `${15 + (index % 8) * 3}s`;
+    element.style.animationDelay = `${-(index * 2.1)}s`;
+    element.style.fontSize = `${14 + (index % 4) * 6}px`;
+    element.style.setProperty("--sway", `${(index % 2 === 0 ? 1 : -1) * (18 + index % 20)}px`);
+    layer.append(element);
+  }
+}
+
+makeFloatingDecorations();
