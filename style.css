@@ -87,6 +87,11 @@ a {
   animation: flower-drift linear infinite;
 }
 
+.bg-strawberry {
+  filter: drop-shadow(0 2px 7px rgba(153, 55, 74, 0.25));
+  animation: flower-drift linear infinite;
+}
+
 .bg-matcha {
   z-index: -2;
   background:
