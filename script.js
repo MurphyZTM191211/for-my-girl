@@ -204,14 +204,23 @@ function makeFloatingDecorations() {
     { symbol: "♥", className: "bg-heart" },
     { symbol: "✿", className: "bg-flower" },
     { symbol: "❀", className: "bg-flower" },
+    { symbol: "🍓", className: "bg-strawberry" },
+    { symbol: "🍓", className: "bg-strawberry" },
   ];
+  const strawberryPositions = ["8%", "82%", "18%", "72%", "30%", "91%", "40%", "64%"];
+  let strawberryCount = 0;
 
   for (let index = 0; index < 24; index += 1) {
     const decoration = decorations[index % decorations.length];
     const element = document.createElement("span");
     element.className = `floating-decoration ${decoration.className}`;
     element.textContent = decoration.symbol;
-    element.style.left = `${(index * 41 + 7) % 100}%`;
+    if (decoration.className === "bg-strawberry") {
+      element.style.left = strawberryPositions[strawberryCount % strawberryPositions.length];
+      strawberryCount += 1;
+    } else {
+      element.style.left = `${(index * 41 + 7) % 100}%`;
+    }
     element.style.animationDuration = `${15 + (index % 8) * 3}s`;
     element.style.animationDelay = `${-(index * 2.1)}s`;
     element.style.fontSize = `${14 + (index % 4) * 6}px`;
